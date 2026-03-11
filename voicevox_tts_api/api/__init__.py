@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routers import chat, speech, models
+from .routers import models, speech
 
 def create_app() -> FastAPI:
     """
@@ -13,7 +13,6 @@ def create_app() -> FastAPI:
 
     # ルーターの登録
     app.include_router(models.router)
-    app.include_router(chat.router)
     app.include_router(speech.router)
 
     return app
