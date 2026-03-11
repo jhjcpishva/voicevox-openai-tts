@@ -1,8 +1,8 @@
 from pathlib import Path
-import os
-from openai import OpenAI
-from loguru import logger
 import sys
+
+from loguru import logger
+from openai import OpenAI
 
 # ログの設定
 logger.remove()  # デフォルトのハンドラを削除
@@ -11,15 +11,9 @@ logger.add(
     format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
     level="INFO"
 )
-logger.add(
-    "issue_creator.log",
-    rotation="500 MB",
-    level="DEBUG",
-    format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}"
-)
 
 # カスタムベースURLを持つOpenAIクライアントを作成
-client = OpenAI(base_url="http://localhost:8000", api_key="sk-1234")
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="sk-1234")
 
 def main():
     # 音声ファイルの保存パス
@@ -31,18 +25,18 @@ def main():
     test_cases = [
         {
             "text": "こんにちは。VOICEVOXのOpenAI TTSフォーマットのテストです。",
-            "voice": "1",
+            "voice": "alloy",
             "description": "標準設定"
         },
         {
             "text": "スピードを変えて話すテストです。",
-            "voice": "1",
+            "voice": "ash",
             "speed": 1.5,
             "description": "高速読み上げ"
         },
         {
             "text": "別の話者での読み上げテストです。",
-            "voice": "2",
+            "voice": "coral",
             "description": "別の話者"
         }
     ]

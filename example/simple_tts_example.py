@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from openai import OpenAI
 from loguru import logger
-import sys
+from openai import OpenAI
 
 
 def main():
