@@ -11,21 +11,19 @@ def main():
     """
     # カスタムベースURLを持つOpenAIクライアントを作成
     client = OpenAI(base_url="http://localhost:8000/v1", api_key="sk-1234")
-    
+
     # 音声合成のリクエストパラメータを設定
     text = "こんにちは。VOICEVOXのOpenAI TTSフォーマットのテストです。"
     voice_id = "alloy"  # VOICEVOXの話者ID
-    
+
     logger.info("音声合成を開始します")
     logger.debug(f"テキスト: {text}")
     logger.debug(f"話者ID: {voice_id}")
-    
+
     try:
         # 音声を生成
         response = client.audio.speech.create(
-            model="voicevox-v1",
-            voice=voice_id,
-            input=text
+            model="voicevox-v1", voice=voice_id, input=text
         )
 
         # 音声ファイルを保存
@@ -33,11 +31,12 @@ def main():
         output_file.parent.mkdir(exist_ok=True)
         with open(output_file, "wb") as file:
             file.write(response.content)
-            
+
         logger.success(f"音声ファイルを保存しました: {output_file}")
 
     except Exception as e:
         logger.error(f"エラーが発生しました: {str(e)}")
+
 
 if __name__ == "__main__":
     main()

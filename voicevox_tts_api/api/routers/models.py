@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
+
 @router.get("/v1/models", summary="利用可能なモデル一覧を取得")
 async def list_models():
     """
@@ -15,7 +16,7 @@ async def list_models():
                 "id": "voicevox-v1",
                 "object": "model",
                 "owned_by": "VOICEVOX",
-                "permission": []
+                "permission": [],
             }
-        ]
+        ],
     }
