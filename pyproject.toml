@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "OpenAI-compatible TTS bridge for VOICEVOX and AivisSpeech"
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.68.0,<0.69.0",
     "pydantic>=1.8.0,<2.0.0",
@@ -33,10 +33,10 @@ module-root = ""
 module-name = "voicevox_tts_api"
 
 [tool.pylint]
-# lint only unsupported features on py39
+# lint only unsupported features on py313
 disable = ["all"]
 enable = ["F", "E"]
-py-version = "3.9"
+py-version = "3.13"
 ignored-modules = []
 ignore-paths = []
 
@@ -46,8 +46,8 @@ extension-pkg-whitelist = "pydantic"
 [tool.ruff]
 extend-include = []
 extend-exclude = []
-# Assume Python 3.9
-target-version = "py39"
+# Assume Python 3.13
+target-version = "py313"
 
 [tool.ruff.format]
 skip-magic-trailing-comma = false
