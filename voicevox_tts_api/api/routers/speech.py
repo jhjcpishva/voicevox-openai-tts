@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, Response
-import requests
 import json
 import os
+import httpx
+from fastapi import APIRouter, HTTPException, Response
+
 from ..schemas.speech import SpeechRequest
 
 router = APIRouter()
@@ -70,26 +71,27 @@ async def create_speech(request: SpeechRequest):
     speaker_id = get_speaker_id(request.voice)
 
     try:
-        # VOICEVOXのクエリを作成
-        query_response = requests.post(
-            audio_query_url, params={"text": request.input, "speaker": speaker_id}
-        )
-        query_response.raise_for_status()
-        query_data = query_response.json()
+        async with httpx.AsyncClient() as client:
+            # VOICEVOXのクエリを作成
+            query_response = await client.post(
+                audio_query_url, params={"text": request.input, "speaker": speaker_id}
+            )
+            query_response.raise_for_status()
+            query_data = query_response.json()
 
-        # 読み上げ速度を設定
-        query_data["speedScale"] = request.speed
+            # 読み上げ速度を設定
+            query_data["speedScale"] = request.speed
 
-        # 音声合成を実行
-        synthesis_response = requests.post(
-            synthesis_url, params={"speaker": speaker_id}, json=query_data
-        )
-        synthesis_response.raise_for_status()
+            # 音声合成を実行
+            synthesis_response = await client.post(
+                synthesis_url, params={"speaker": speaker_id}, json=query_data
+            )
+            synthesis_response.raise_for_status()
 
         # レスポンスを返す
         return Response(content=synthesis_response.content, media_type="audio/mpeg")
 
-    except requests.RequestException as e:
+    except httpx.HTTPError as e:
         raise HTTPException(
             status_code=500, detail=f"VOICEVOXエンジンとの通信に失敗しました: {str(e)}"
         )
