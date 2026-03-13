@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from .routers import models, speech
+from .routers import core, models, speech
 
 
 def create_app() -> FastAPI:
@@ -13,6 +13,7 @@ def create_app() -> FastAPI:
         version="1.0.0",
     )
 
+    app.include_router(core.router)
     app.include_router(models.router)
     app.include_router(speech.router)
 
