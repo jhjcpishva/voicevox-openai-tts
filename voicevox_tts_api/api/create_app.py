@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from .routers import chat, models, speech
+from .routers import models, speech
 
 
 def create_app() -> FastAPI:
@@ -14,7 +14,6 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(models.router)
-    app.include_router(chat.router)
     app.include_router(speech.router)
 
     return app
