@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from .routers import core, models, speech
+from .routers import core, speech, voices
 
 
 def create_app() -> FastAPI:
@@ -14,7 +14,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(core.router)
-    app.include_router(models.router)
+    app.include_router(voices.router)
     app.include_router(speech.router)
 
     return app

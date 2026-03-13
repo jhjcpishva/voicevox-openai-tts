@@ -1,25 +1,11 @@
-import json
 import os
 import httpx
 from fastapi import APIRouter, HTTPException, Response
 
+from ..voice_mappings import load_voice_mappings
 from ..schemas.speech import SpeechRequest
 
 router = APIRouter()
-
-# voice_mappings.jsonの読み込み
-DEFAULT_MAPPING_PATH = "/app/voice_mappings.json"
-VOICE_MAPPINGS_PATH = os.getenv("VOICE_MAPPINGS_PATH", DEFAULT_MAPPING_PATH)
-
-
-def load_voice_mappings():
-    """音声IDマッピングを読み込む"""
-    try:
-        with open(VOICE_MAPPINGS_PATH) as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"Warning: Failed to load voice mappings: {e}")
-        return {}
 
 
 def get_speaker_id(voice: str) -> int:
