@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException
 
 from ..schemas.voices import AudioVoice
 from ..schemas.voices import AudioVoicesResponse
+from ..voice_mappings import load_voice_mappings
 
 router = APIRouter()
 
@@ -38,6 +39,10 @@ def flatten_speakers_to_voices(speakers: list[dict]) -> list[AudioVoice]:
     return voices
 
 
+def mapping_aliases_to_voices() -> list[AudioVoice]:
+    return [AudioVoice(id=alias, name=alias) for alias in load_voice_mappings()]
+
+
 @router.get("/v1/audio/voices", summary="利用可能な音声一覧を取得")
 async def list_audio_voices() -> AudioVoicesResponse:
     """
@@ -55,5 +60,6 @@ async def list_audio_voices() -> AudioVoicesResponse:
             status_code=500, detail=f"VOICEVOXエンジンとの通信に失敗しました: {str(e)}"
         )
 
-    voices = flatten_speakers_to_voices(response.json())
-    return AudioVoicesResponse(voices=voices)
+    style_voices = flatten_speakers_to_voices(response.json())
+    alias_voices = mapping_aliases_to_voices()
+    return AudioVoicesResponse(voices=style_voices + alias_voices)
