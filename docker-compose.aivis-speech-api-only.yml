@@ -8,6 +8,7 @@ services:
       - "8000:8000"
     environment:
       - VOICEVOX_ENGINE_URL=http://host.docker.internal:10101
+      - VOICE_MAPPINGS_PATH=/app/voice_mappings.json
     restart: unless-stopped
     volumes:
       - ./voice_mappings/aivis-speech.json:/app/voice_mappings.json
