@@ -102,9 +102,9 @@ with response.with_streaming_response.stream_to_file("output.mp3"):
 ├── voice_mappings/      # 各エンジン用の話者IDマッピング
 │   ├── voicevox.json
 │   └── aivis-speech.json
-├── voicevox_tts_api/   # OpenAI互換APIの実装
-│   ├── tts_api.py      # メインAPIコード
-│   └── requirements.txt # Python依存パッケージ
+├── src/voicevox_openai_tts/   # OpenAI互換APIの実装
+│   ├── main.py         # メインAPIコード
+│   └── api/            # API層モジュール
 └── example/            # 使用例とテストスクリプト
     ├── tts_example.py  # サンプルスクリプト
     └── README.md       # サンプルの説明
