@@ -12,6 +12,10 @@ dependencies = [
     "uvicorn>=0.15.0,<0.16.0",
 ]
 
+[build-system]
+requires = ["uv_build>=0.8.22,<0.9.0"]
+build-backend = "uv_build"
+
 [project.optional-dependencies]
 example = [
     "loguru>=0.7.3",
@@ -29,8 +33,8 @@ dev = [
 # [project.scripts]
 
 [tool.uv.build-backend]
-module-root = ""
-module-name = "voicevox_tts_api"
+module-root = "src"
+module-name = "voicevox_openai_tts"
 
 [tool.pylint]
 # lint only unsupported features on py313

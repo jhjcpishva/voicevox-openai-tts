@@ -31,6 +31,7 @@ services:
       - "8000:8000"
     environment:
       - VOICEVOX_ENGINE_URL=http://voicevox_engine:50021
+      - VOICE_MAPPINGS_PATH=/app/voice_mappings.json
     depends_on:
       - voicevox_engine
     restart: unless-stopped
