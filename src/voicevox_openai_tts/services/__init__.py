@@ -1,4 +1,4 @@
-from .tts import TTSService
+from .speech import SpeechService, InvalidVoiceError, SpeechServiceError
 from .voice import VoiceService
 
-__all__ = ["TTSService", "VoiceService"]
+__all__ = ["SpeechService", "VoiceService", "InvalidVoiceError", "SpeechServiceError"]

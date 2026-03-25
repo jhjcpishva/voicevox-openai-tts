@@ -5,8 +5,8 @@ import httpx
 from ..api.voice_mappings import load_voice_mappings
 
 
-class TTSServiceError(Exception):
-    """TTSサービス関連のエラー"""
+class SpeechServiceError(Exception):
+    """Speechサービス関連のエラー"""
 
     def __init__(self, message: str, status_code: int = 500):
         self.message = message
@@ -14,7 +14,7 @@ class TTSServiceError(Exception):
         super().__init__(self.message)
 
 
-class InvalidVoiceError(TTSServiceError):
+class InvalidVoiceError(SpeechServiceError):
     """無効な音声指定時のエラー"""
 
     def __init__(self, voice: str, available_voices: list[str]):
@@ -24,7 +24,7 @@ class InvalidVoiceError(TTSServiceError):
         super().__init__(message, status_code=400)
 
 
-class TTSService:
+class SpeechService:
     """音声合成関連のビジネスロジックを担当するサービス"""
 
     def __init__(self, voicevox_engine_url: str | None = None):
@@ -73,7 +73,7 @@ class TTSService:
             tuple[bytes, str]: 音声データとメディアタイプ
 
         Raises:
-            TTSServiceError: 音声合成に失敗した場合
+            SpeechServiceError: 音声合成に失敗した場合
         """
         speaker_id = self._get_speaker_id(voice)
         audio_query_url = f"{self.voicevox_url}/audio_query"
@@ -100,7 +100,7 @@ class TTSService:
             return synthesis_response.content, "audio/mpeg"
 
         except httpx.HTTPError as e:
-            raise TTSServiceError(
+            raise SpeechServiceError(
                 f"VOICEVOXエンジンとの通信に失敗しました: {str(e)}",
                 status_code=500,
             )

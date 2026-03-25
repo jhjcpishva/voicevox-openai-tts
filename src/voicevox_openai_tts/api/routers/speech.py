@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Response
 
 from ..schemas.speech import SpeechRequest
-from ...services.tts import TTSService, TTSServiceError, InvalidVoiceError
+from ...services.speech import SpeechService, SpeechServiceError, InvalidVoiceError
 
 router = APIRouter()
 
@@ -20,10 +20,10 @@ async def create_speech(request: SpeechRequest):
     Raises:
         HTTPException: VOICEVOXエンジンとの通信に失敗した場合
     """
-    tts_service = TTSService()
+    speech_service = SpeechService()
 
     try:
-        audio_data, media_type = await tts_service.synthesize_speech(
+        audio_data, media_type = await speech_service.synthesize_speech(
             text=request.input,
             voice=request.voice,
             speed=request.speed,
@@ -31,5 +31,5 @@ async def create_speech(request: SpeechRequest):
         return Response(content=audio_data, media_type=media_type)
     except InvalidVoiceError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
-    except TTSServiceError as e:
+    except SpeechServiceError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
