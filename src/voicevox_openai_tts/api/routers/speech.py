@@ -1,37 +1,9 @@
-import os
-import httpx
 from fastapi import APIRouter, HTTPException, Response
 
-from ..voice_mappings import load_voice_mappings
 from ..schemas.speech import SpeechRequest
+from ...services.tts import TTSService, TTSServiceError, InvalidVoiceError
 
 router = APIRouter()
-
-
-def get_speaker_id(voice: str) -> int:
-    """
-    音声名またはIDからスピーカーIDを取得
-
-    Args:
-        voice: 音声名または音声ID
-
-    Returns:
-        int: スピーカーID
-    """
-    mappings = load_voice_mappings()
-
-    # マッピングに存在する場合はマッピングされたIDを返す
-    if voice in mappings:
-        return int(mappings[voice])
-
-    # 直接数値が指定された場合はそのまま返す
-    try:
-        return int(voice)
-    except ValueError:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid voice: {voice}. Available voices: {', '.join(mappings.keys())}",
-        )
 
 
 @router.post("/v1/audio/speech", summary="テキストを音声に変換")
@@ -43,41 +15,21 @@ async def create_speech(request: SpeechRequest):
         request: 音声合成リクエスト
 
     Returns:
-        dict: 音声データとフォーマット情報
+        Response: 音声データを含むHTTPレスポンス
 
     Raises:
         HTTPException: VOICEVOXエンジンとの通信に失敗した場合
     """
-    # VOICEVOXのAPIエンドポイント
-    voicevox_url = os.getenv("VOICEVOX_ENGINE_URL", "http://voicevox_engine:50021")
-    audio_query_url = f"{voicevox_url}/audio_query"
-    synthesis_url = f"{voicevox_url}/synthesis"
-
-    # スピーカーIDを取得（voiceパラメータから）
-    speaker_id = get_speaker_id(request.voice)
+    tts_service = TTSService()
 
     try:
-        async with httpx.AsyncClient() as client:
-            # VOICEVOXのクエリを作成
-            query_response = await client.post(
-                audio_query_url, params={"text": request.input, "speaker": speaker_id}
-            )
-            query_response.raise_for_status()
-            query_data = query_response.json()
-
-            # 読み上げ速度を設定
-            query_data["speedScale"] = request.speed
-
-            # 音声合成を実行
-            synthesis_response = await client.post(
-                synthesis_url, params={"speaker": speaker_id}, json=query_data
-            )
-            synthesis_response.raise_for_status()
-
-        # レスポンスを返す
-        return Response(content=synthesis_response.content, media_type="audio/mpeg")
-
-    except httpx.HTTPError as e:
-        raise HTTPException(
-            status_code=500, detail=f"VOICEVOXエンジンとの通信に失敗しました: {str(e)}"
+        audio_data, media_type = await tts_service.synthesize_speech(
+            text=request.input,
+            voice=request.voice,
+            speed=request.speed,
         )
+        return Response(content=audio_data, media_type=media_type)
+    except InvalidVoiceError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+    except TTSServiceError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
