@@ -15,56 +15,108 @@ VOICEVOX/AivisSpeechエンジンをOpenAIの音声合成APIフォーマットで
 
 ## 🌟 特徴
 
-- OpenAIのTTS APIと同じフォーマットでリクエストを受け付け
-- VOICEVOXエンジンを使用した高品質な日本語音声合成
-- AivisSpeechエンジンにも対応
-- Dockerで簡単にデプロイ可能
+- VOICEVOX互換エンジンによる日本語音声合成をOpenAI TTS APIと互換のフォーマットで音声合成が可能
+- VOIVEVOX, AivisSpeech等に対応
+- OpenWebUI からの読み上げに対応
+- // TODO: voice_mappings について書く
 
-## 🚀 使用方法
+## 🚀 Quick Start
 
-### 🐳 起動方法
+### 方法1: Docker Composeですべて起動（推奨）
+
+VOICEVOX Engine や AivisSpeech Engine の音声合成をセットで起動します。
+
+事前に Docker と Docker Compose がインストールされている必要があります。
 
 ```bash
-# VOICEVOX（CPU）
-docker-compose up -d
+# リポジトリをクローン
+git clone <...>
+cd voicevox-openai-tts
 
-# VOICEVOX（GPU）
+# VOICEVOX（CPU版）で使う場合
+docker compose up -d
+
+# VOICEVOX（GPU NVIDIA）を使う場合
 docker compose -f docker-compose.gpu.yml up -d
 
-# AivisSpeech（Docker実行）
+# AivisSpeech（CPU版）を使う場合
 docker compose -f docker-compose.aivis-speech.yml up -d
-
-# AivisSpeech（ローカル実行中のAPIに接続）
-docker compose -f docker-compose.aivis-speech-api-only.yml up -d
 ```
 
-### 📝 APIエンドポイント
+OpenAI 互換のAPIが `http://localhost:8000/v1` にて理想可能です
+
+### 方法2: ローカルでエンジンを起動 + Docker で API サーバーを起動
+
+すでにローカルで VOICEVOX/AivisSpeech エンジンを起動している場合は、API サーバーだけを Docker で起動できます。
+
+**Step 1: ローカルでエンジンを起動**
+
+- [VOICEVOX](https://voicevox.hiroshiba.jp/) をダウンロードして起動（デフォルトでポート `50021` ）
+- または [AivisSpeech](https://aivis-project.com/) を起動（デフォルトでポート `10101` ）
+
+**Step 2: API サーバーを Docker で起動**
 
 ```bash
-POST http://localhost:8000/audio/speech
+# VOICEVOX をローカルで起動している場合（Mac/Linux 例）
+docker run --rm -p 8000:8000 \
+  -e VOICEVOX_ENGINE_URL=http://host.docker.internal:50021 \
+  ghcr.io/...
+
+# AivisSpeech をローカルで起動している場合（Mac/Linux 例）
+docker run --rm -p 8000:8000 \
+  -e VOICEVOX_ENGINE_URL=http://host.docker.internal:10101 \
+  ghcr.io/...
 ```
 
-### リクエスト形式（OpenAI互換）
 
-```json
-{
-  "model": "voicevox-v1",
-  "input": "こんにちは、音声合成のテストです。",
-  "voice": "1",
-  "response_format": "mp3",
-  "speed": 1.0
-}
+**Step 3: OpenWebUI などでの設定**
+
+- OpenAI 互換のAPIが `http://localhost:8000/v1` or `http://host.docker.internal:8000/v1` にて利用可能
+- OpenWebUI の設定例：
+  - Settings → Audio → Text-to-Speech で「OpenAI」を選択
+  - API Base URL: `http://localhost:8000/v1` or `http://host.docker.internal:8000/v1`
+  - API Key: 任意の値（`sk-1234`など）
+  - Model: `voicevox-v1`
+  - Voice: `alloy`（または `/v1/audio/voices` で取得した `id` を使用）
+
+### 方法3: 手動で起動（開発・カスタマイズ用）
+
+Docker を使わずに、ローカルで開発環境を構築して起動する方法です。
+
+**Step 1: ローカルでエンジンを起動**
+
+- [VOICEVOX](https://voicevox.hiroshiba.jp/) をダウンロードして起動（デフォルトでポート 50021）
+- または [AivisSpeech](https://aivis-project.com/) を起動（デフォルトでポート 10101）
+
+**Step 2: 依存関係をインストール**
+
+```bash
+# リポジトリをクローン
+git clone <repository-url>
+cd voicevox-openai-tts
+
+# 依存関係をインストール
+uv sync
 ```
 
-### パラメータ説明
+**Step 3: 環境変数を設定**
 
-- `model`: 使用するモデル（現在は"voicevox-v1"のみ）
-- `input`: 読み上げるテキスト
-- `voice`: VOICEVOXのスピーカーID
-- `response_format`: 出力フォーマット（現在は"mp3"のみ）
-- `speed`: 読み上げ速度（デフォルト: 1.0）
+```bash
+# VOICEVOX の場合
+export VOICEVOX_ENGINE_URL=http://localhost:50021
 
-### レスポンス形式
+# AivisSpeech の場合
+export VOICEVOX_ENGINE_URL=http://localhost:10101
+```
+
+**Step 4: API サーバーを起動**
+
+```bash
+# 開発サーバーを起動（ホットリロード付き）
+uv run uvicorn voicevox_openai_tts.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+API が `http://localhost:8000` で利用可能になります。
 
 - Content-Type: `audio/mpeg`
 - Body: MP3形式の音声データ（バイナリ）
