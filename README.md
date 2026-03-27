@@ -15,8 +15,7 @@ VOICEVOX/AivisSpeechエンジンをOpenAIの音声合成APIフォーマットで
 
 ## 🌟 特徴
 
-- VOICEVOX互換エンジンによる日本語音声合成をOpenAI TTS APIと互換のフォーマットで音声合成が可能
-  - VOIVEVOX, AivisSpeech等に対応
+- OpenAI 互換の TTS API と同じインターフェイスで、VOICEVOX／AivisSpeech による日本語音声合成が可能
 - OpenWebUI からの読み上げに対応
 - VOICEVOX 話者StyleID もしくは OpenAI互換名 を指定可能
   - カスタマイズ可能な音声マッピング（OpenAI互換名 ↔ VOICEVOX/AivisSpeechの話者ID）
@@ -44,7 +43,7 @@ docker compose -f docker-compose.gpu.yml up -d
 docker compose -f docker-compose.aivis-speech.yml up -d
 ```
 
-OpenAI 互換のAPIが `http://localhost:8000/v1` にて理想可能です
+OpenAI互換APIが `http://localhost:8000/v1` にて利用可能です
 
 ### 方法2: ローカルでエンジンを起動 + Docker で API サーバーを起動
 
@@ -168,7 +167,7 @@ curl -X POST http://localhost:8000/v1/audio/speech \
     "voice": "alloy",
     "speed": 1.0
   }' \
-  --output output.mp3
+  -o output.mp3
 ```
 
 **リクエストパラメータ:**
@@ -197,9 +196,10 @@ curl http://localhost:8000/v1/audio/voices
 
 **レスポンス例:**
 
-```json
+```jsonc
 {
   "voices": [
+    // VOICEVOX等から取得した話者一覧
     {
       "id": "2",
       "name": "四国めたん / ノーマル"
@@ -209,6 +209,7 @@ curl http://localhost:8000/v1/audio/voices
       "name": "四国めたん / あまあま"
     },
     ...
+    // voice_mappings.json のkey一覧
     {
       "id": "alloy",
       "name": "alloy"
@@ -239,32 +240,32 @@ with open("output.mp3", "wb") as f:
 
 ## 📁 プロジェクト構造
 
-```
+```text
 .
-├── docker-compose.yml                          # VOICEVOX CPU版
-├── docker-compose.gpu.yml                      # VOICEVOX GPU版
-├── docker-compose.aivis-speech.yml             # AivisSpeech Docker版
-├── docker-compose.aivis-speech-api-only.yml    # AivisSpeech（ローカル実行）用APIブリッジ
-├── Dockerfile                                  # APIサーバーのビルド設定
-├── pyproject.toml                              # Pythonパッケージ設定
-├── voice_mappings/                             # 各エンジン用の話者IDマッピング
+├── docker-compose.yml                        # VOICEVOX CPU版
+├── docker-compose.gpu.yml                    # VOICEVOX GPU版
+├── docker-compose.aivis-speech.yml           # AivisSpeech Docker版
+├── docker-compose.aivis-speech-api-only.yml  # AivisSpeech（ローカル実行）用APIブリッジ
+├── Dockerfile                                # APIサーバーのビルド設定
+├── pyproject.toml                            # Pythonパッケージ設定
+├── voice_mappings/                           # 各エンジン用の話者IDマッピング
 │   ├── voicevox.json
 │   └── aivis-speech.json
 ├── src/
-│   └── voicevox_openai_tts/                    # OpenAI互換APIの実装
-│       ├── main.py                             # アプリケーションエントリポイント
-│       ├── api/                                # API層
-│       │   ├── create_app.py                  # FastAPIアプリケーション作成
-│       │   ├── routers/                       # APIルーター
-│       │   │   ├── speech.py                  # 音声合成エンドポイント
-│       │   │   ├── voices.py                  # 音声一覧エンドポイント
-│       │   │   └── core.py                    # 基本エンドポイント（health等）
-│       │   ├── schemas/                       # Pydanticスキーマ
-│       │   └── voice_mappings.py              # 音声マッピング設定
-│       └── services/                          # ビジネスロジック層
-│           ├── speech.py                      # 音声合成サービス
-│           └── voice.py                       # 音声情報サービス
-└── tests/                                      # テストコード
+│   └── voicevox_openai_tts/       # OpenAI互換APIの実装
+│       ├── main.py                # アプリケーションエントリポイント
+│       ├── api/                   # API層
+│       │   ├── create_app.py      # FastAPIアプリケーション作成
+│       │   ├── routers/           # APIルーター
+│       │   │   ├── speech.py      # 音声合成エンドポイント
+│       │   │   ├── voices.py      # 音声一覧エンドポイント
+│       │   │   └── core.py        # 基本エンドポイント（health等）
+│       │   ├── schemas/           # Pydanticスキーマ
+│       │   └── voice_mappings.py  # 音声マッピング設定
+│       └── services/              # ビジネスロジック層
+│           ├── speech.py          # 音声合成サービス
+│           └── voice.py           # 音声情報サービス
+└── tests/                         # テストコード
 ```
 
 ## 🔒 ライセンス
