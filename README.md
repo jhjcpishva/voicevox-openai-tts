@@ -218,47 +218,42 @@ with response.with_streaming_response.stream_to_file("output.mp3"):
 
 ```
 .
-├── docker-compose.yml                        # VOICEVOX CPU版
-├── docker-compose.gpu.yml                    # VOICEVOX GPU版
-├── docker-compose.aivis-speech.yml           # AivisSpeech Docker版
-├── docker-compose.aivis-speech-api-only.yml  # AivisSpeech（ローカル実行）用APIブリッジ
-├── Dockerfile           # APIサーバーのビルド設定
-├── voice_mappings/      # 各エンジン用の話者IDマッピング
+├── docker-compose.yml                          # VOICEVOX CPU版
+├── docker-compose.gpu.yml                      # VOICEVOX GPU版
+├── docker-compose.aivis-speech.yml             # AivisSpeech Docker版
+├── docker-compose.aivis-speech-api-only.yml    # AivisSpeech（ローカル実行）用APIブリッジ
+├── Dockerfile                                  # APIサーバーのビルド設定
+├── pyproject.toml                              # Pythonパッケージ設定
+├── voice_mappings/                             # 各エンジン用の話者IDマッピング
 │   ├── voicevox.json
 │   └── aivis-speech.json
-├── src/voicevox_openai_tts/   # OpenAI互換APIの実装
-│   ├── main.py         # メインAPIコード
-│   └── api/            # API層モジュール
-└── example/            # 使用例とテストスクリプト
-    ├── tts_example.py  # サンプルスクリプト
-    └── README.md       # サンプルの説明
+├── src/
+│   └── voicevox_openai_tts/                    # OpenAI互換APIの実装
+│       ├── main.py                             # アプリケーションエントリポイント
+│       ├── api/                                # API層
+│       │   ├── create_app.py                  # FastAPIアプリケーション作成
+│       │   ├── routers/                       # APIルーター
+│       │   │   ├── speech.py                  # 音声合成エンドポイント
+│       │   │   ├── voices.py                  # 音声一覧エンドポイント
+│       │   │   └── core.py                    # 基本エンドポイント（health等）
+│       │   ├── schemas/                       # Pydanticスキーマ
+│       │   └── voice_mappings.py              # 音声マッピング設定
+│       └── services/                          # ビジネスロジック層
+│           ├── speech.py                      # 音声合成サービス
+│           └── voice.py                       # 音声情報サービス
+├── tests/                                      # テストコード
+└── example/                                    # 使用例
+    ├── tts_example.py
+    └── simple_tts_example.py
 ```
 
-## 🔧 システム要件
 
-- Docker
-- Docker Compose
+## 🔧 環境変数
 
-## 🎯 サンプルコード
-
-`example`ディレクトリに、APIの使用例とテストスクリプトが用意されています。
-詳しい使い方は[example/README.md](example/README.md)を参照してください。
-
-## 🛠️ アーキテクチャ
-
-```
-                                  ┌─────────────┐
-HTTP Request (OpenAI Format) ──▶  │  TTS API    │
-                                  │  (FastAPI)   │
-                                  └──────┬──────┘
-                                         │
-                                         ▼
-                                  ┌─────────────┐
-                                  │  VOICEVOX / │
-                                  │ AivisSpeech │
-                                  │   Engine    │
-                                  └─────────────┘
-```
+| 変数名 | デフォルト | 説明 |
+|--------|-----------|------|
+| `VOICEVOX_ENGINE_URL` | `http://localhost:50021` | VOICEVOX/AivisSpeechエンジンのURL |
+| `VOICE_MAPPINGS_PATH` | - | 音声マッピングJSONファイルのパス |
 
 ## 🔒 ライセンス
 
