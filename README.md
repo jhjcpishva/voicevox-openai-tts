@@ -5,11 +5,11 @@
 # 🎤 VOICEVOX OpenAI TTS API
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.13%2B-blue)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/Docker-Supported-blue)](https://www.docker.com/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.68%2B-009688)](https://fastapi.tiangolo.com/)
 
-VOICEVOXエンジンをOpenAIの音声合成APIフォーマットに変換するためのAPIサーバーです。
+VOICEVOX/AivisSpeechエンジンをOpenAIの音声合成APIフォーマットで利用するためのAPIサーバーです。
 
 </div>
 
@@ -139,3 +139,7 @@ HTTP Request (OpenAI Format) ──▶  │  TTS API    │
 ## 🔒 ライセンス
 
 MITライセンス
+
+---
+
+*このプロジェクトは [litagin02/voicevox-openai-tts](https://github.com/Sunwood-ai-labs/voicevox-openai-tts) をフォーク・リファクタリングしたものです。*
