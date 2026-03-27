@@ -261,4 +261,4 @@ MITライセンス
 
 ---
 
-*このプロジェクトは [litagin02/voicevox-openai-tts](https://github.com/Sunwood-ai-labs/voicevox-openai-tts) をフォーク・リファクタリングしたものです。*
+*このプロジェクトは [Sunwood-ai-labs/voicevox-openai-tts](https://github.com/Sunwood-ai-labs/voicevox-openai-tts) をフォーク・リファクタリングしたものです。*
