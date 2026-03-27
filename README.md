@@ -49,12 +49,12 @@ OpenAI 互換のAPIが `http://localhost:8000/v1` にて理想可能です
 
 すでにローカルで VOICEVOX/AivisSpeech エンジンを起動している場合は、API サーバーだけを Docker で起動できます。
 
-**Step 1: ローカルでエンジンを起動**
+#### Step 1: ローカルでエンジンを起動
 
 - [VOICEVOX](https://voicevox.hiroshiba.jp/) をダウンロードして起動（デフォルトでポート `50021` ）
 - または [AivisSpeech](https://aivis-project.com/) を起動（デフォルトでポート `10101` ）
 
-**Step 2: API サーバーを Docker で起動**
+#### Step 2: API サーバーを Docker で起動
 
 ```bash
 # VOICEVOX をローカルで起動している場合（Mac/Linux 例）
@@ -68,8 +68,7 @@ docker run --rm -p 8000:8000 \
   ghcr.io/...
 ```
 
-
-**Step 3: OpenWebUI などでの設定**
+#### Step 3: OpenWebUI などでの設定
 
 - OpenAI 互換のAPIが `http://localhost:8000/v1` or `http://host.docker.internal:8000/v1` にて利用可能
 - OpenWebUI の設定例：
@@ -83,12 +82,12 @@ docker run --rm -p 8000:8000 \
 
 Docker を使わずに、ローカルで開発環境を構築して起動する方法です。
 
-**Step 1: ローカルでエンジンを起動**
+#### Step 1: ローカルでエンジンを起動
 
 - [VOICEVOX](https://voicevox.hiroshiba.jp/) をダウンロードして起動（デフォルトでポート 50021）
 - または [AivisSpeech](https://aivis-project.com/) を起動（デフォルトでポート 10101）
 
-**Step 2: 依存関係をインストール**
+#### Step 2: 依存関係をインストール
 
 ```bash
 # リポジトリをクローン
@@ -99,7 +98,7 @@ cd voicevox-openai-tts
 uv sync
 ```
 
-**Step 3: 環境変数を設定**
+#### Step 3: 環境変数を設定
 
 ```bash
 # VOICEVOX の場合
@@ -109,7 +108,7 @@ export VOICEVOX_ENGINE_URL=http://localhost:50021
 export VOICEVOX_ENGINE_URL=http://localhost:10101
 ```
 
-**Step 4: API サーバーを起動**
+#### Step 4: API サーバーを起動
 
 ```bash
 # 開発サーバーを起動（ホットリロード付き）
