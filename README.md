@@ -211,24 +211,23 @@ curl http://localhost:8000/v1/audio/voices
 }
 ```
 
+## 🐍 OpenAI Python API library での使用例
 
 ```python
+# pip install openai
 from openai import OpenAI
 
-# カスタムベースURLを持つOpenAIクライアントを作成
-client = OpenAI(base_url="http://localhost:8000", api_key="sk-1234")
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="sk-1234")
 
-# 音声を生成
 response = client.audio.speech.create(
     model="voicevox-v1",
-    voice="1",
+    voice="alloy",
     input="こんにちは、音声合成のテストです。",
     speed=1.0
 )
 
-# 音声ファイルを保存（ストリーミングレスポンスを使用）
-with response.with_streaming_response.stream_to_file("output.mp3"):
-    pass
+with open("output.mp3", "wb") as f:
+    f.write(response.content)
 ```
 
 ## 📁 プロジェクト構造
@@ -258,10 +257,7 @@ with response.with_streaming_response.stream_to_file("output.mp3"):
 │       └── services/                          # ビジネスロジック層
 │           ├── speech.py                      # 音声合成サービス
 │           └── voice.py                       # 音声情報サービス
-├── tests/                                      # テストコード
-└── example/                                    # 使用例
-    ├── tts_example.py
-    └── simple_tts_example.py
+└── tests/                                      # テストコード
 ```
 
 
