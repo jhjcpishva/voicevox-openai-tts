@@ -117,6 +117,23 @@ uv run uvicorn voicevox_openai_tts.main:app --host 0.0.0.0 --port 8000 --reload
 
 API が `http://localhost:8000` で利用可能になります。
 
+### OpenAI互換名 <-> VOICEVOX デフォルトマッピング
+
+`voice_mappings/voicevox.json`
+
+| OpenAI互換名 | VOICEVOX マッピング | 話者ID |
+| ------- | ------------------ | - |
+| alloy   | ずんだもん / ノーマル | 3 |
+| ash     | 四国めたん / ノーマル | 2 |
+| nova    | 春日部つむぎ / ノーマル | 10 |
+| coral   | 雨晴はう / ノーマル | 12 |
+| sage    | 波音リツ / ノーマル | 13 |
+| onyx    | 玄野武宏 / ノーマル | 11 |
+| echo    | 白上虎太郎 / ふつう | 8 |
+| fable   | 青山龍星 / ノーマル | 9 |
+| shimmer | 冥鳴ひまり / ノーマル | 14 |
+
+
 ## 📡 API仕様
 
 ### エンドポイント
