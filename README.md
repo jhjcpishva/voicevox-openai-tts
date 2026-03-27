@@ -117,10 +117,83 @@ uv run uvicorn voicevox_openai_tts.main:app --host 0.0.0.0 --port 8000 --reload
 
 API が `http://localhost:8000` で利用可能になります。
 
+## 📡 API仕様
+
+### エンドポイント
+
+| メソッド | パス | 説明 |
+|---------|------|------|
+| POST | `/v1/audio/speech` | テキストを音声に変換 |
+| GET | `/v1/audio/voices` | 利用可能な音声一覧を取得 |
+| GET | `/health` | ヘルスチェック |
+
+`http://localhost:8000/docs` で Swagger UI も利用可能です
+
+### POST /v1/audio/speech
+
+テキストを音声に変換します（OpenAI TTS API互換）。
+
+**リクエスト例:**
+
+```bash
+curl -X POST http://localhost:8000/v1/audio/speech \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "voicevox-v1",
+    "input": "こんにちは、音声合成のテストです。",
+    "voice": "alloy",
+    "speed": 1.0
+  }' \
+  --output output.mp3
+```
+
+**リクエストパラメータ:**
+
+| パラメータ | 型 | 必須 | 説明 |
+|-----------|-----|------|------|
+| `model` | string | Yes | モデル名（"voicevox-v1"固定） |
+| `input` | string | Yes | 読み上げるテキスト |
+| `voice` | string | Yes | 話者ID（VOICEVOX StyleID, `/v1/audio/voices` で取得可能）またはOpenAI互換名（alloy, ash等） |
+| `speed` | float | No | 読み上げ速度（0.5〜2.0、デフォルト: 1.0） |
+
+**レスポンス:**
+
 - Content-Type: `audio/mpeg`
 - Body: MP3形式の音声データ（バイナリ）
 
-### Pythonでの使用例
+### GET /v1/audio/voices
+
+利用可能な音声一覧を取得します（OpenWebUI互換）。
+
+**リクエスト例:**
+
+```bash
+curl http://localhost:8000/v1/audio/voices
+```
+
+**レスポンス例:**
+
+```json
+{
+  "voices": [
+    {
+      "id": "2",
+      "name": "四国めたん / ノーマル"
+    },
+    {
+      "id": "0",
+      "name": "四国めたん / あまあま"
+    },
+    ...
+    {
+      "id": "alloy",
+      "name": "alloy"
+    },
+    ...
+  ]
+}
+```
+
 
 ```python
 from openai import OpenAI
