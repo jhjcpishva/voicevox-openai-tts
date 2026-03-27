@@ -16,9 +16,10 @@ VOICEVOX/AivisSpeechエンジンをOpenAIの音声合成APIフォーマットで
 ## 🌟 特徴
 
 - VOICEVOX互換エンジンによる日本語音声合成をOpenAI TTS APIと互換のフォーマットで音声合成が可能
-- VOIVEVOX, AivisSpeech等に対応
+  - VOIVEVOX, AivisSpeech等に対応
 - OpenWebUI からの読み上げに対応
-- // TODO: voice_mappings について書く
+- VOICEVOX 話者StyleID もしくは OpenAI互換名 を指定可能
+  - カスタマイズ可能な音声マッピング（OpenAI互換名 ↔ VOICEVOX/AivisSpeechの話者ID）
 
 ## 🚀 Quick Start
 
@@ -117,7 +118,7 @@ uv run uvicorn voicevox_openai_tts.main:app --host 0.0.0.0 --port 8000 --reload
 
 API が `http://localhost:8000` で利用可能になります。
 
-### OpenAI互換名 <-> VOICEVOX デフォルトマッピング
+### OpenAI互換名 ↔ VOICEVOX デフォルトマッピング
 
 `voice_mappings/voicevox.json`
 
@@ -133,6 +134,12 @@ API が `http://localhost:8000` で利用可能になります。
 | fable   | 青山龍星 / ノーマル | 9 |
 | shimmer | 冥鳴ひまり / ノーマル | 14 |
 
+## 🔧 環境変数
+
+| 変数名 | デフォルト | 説明 |
+|--------|-----------|------|
+| `VOICEVOX_ENGINE_URL` | `http://localhost:50021` | VOICEVOX/AivisSpeechエンジンのURL |
+| `VOICE_MAPPINGS_PATH` | - | 音声マッピングJSONファイルのパス |
 
 ## 📡 API仕様
 
@@ -259,14 +266,6 @@ with open("output.mp3", "wb") as f:
 │           └── voice.py                       # 音声情報サービス
 └── tests/                                      # テストコード
 ```
-
-
-## 🔧 環境変数
-
-| 変数名 | デフォルト | 説明 |
-|--------|-----------|------|
-| `VOICEVOX_ENGINE_URL` | `http://localhost:50021` | VOICEVOX/AivisSpeechエンジンのURL |
-| `VOICE_MAPPINGS_PATH` | - | 音声マッピングJSONファイルのパス |
 
 ## 🔒 ライセンス
 
