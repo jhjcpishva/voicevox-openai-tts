@@ -1,10 +1,10 @@
-import os
 from dataclasses import dataclass
 
 import httpx
 
 from ..api.voice_mappings import load_voice_mappings
 from ..api.schemas.voices import AudioVoice
+from ..settings import get_settings
 
 
 @dataclass
@@ -19,9 +19,7 @@ class VoiceService:
     """音声情報関連のビジネスロジックを担当するサービス"""
 
     def __init__(self, voicevox_engine_url: str | None = None):
-        self.voicevox_url = voicevox_engine_url or os.getenv(
-            "VOICEVOX_ENGINE_URL", "http://voicevox_engine:50021"
-        )
+        self.voicevox_url = voicevox_engine_url or get_settings().voicevox_engine_url
 
     def _build_voice_name(self, speaker_name: str, style_name: str) -> str:
         return f"{speaker_name} / {style_name}"
