@@ -37,10 +37,10 @@ cd voicevox-openai-tts
 docker compose up -d
 
 # VOICEVOX（GPU NVIDIA）を使う場合
-docker compose -f docker-compose.gpu.yml up -d
+docker compose -f docker-compose.gpu.yaml up -d
 
 # AivisSpeech（CPU版）を使う場合
-docker compose -f docker-compose.aivis-speech.yml up -d
+docker compose -f docker-compose.aivis-speech.yaml up -d
 ```
 
 OpenAI互換APIが `http://localhost:8000/v1` にて利用可能です
@@ -242,13 +242,13 @@ with open("output.mp3", "wb") as f:
 
 ```text
 .
-├── docker-compose.yml                        # VOICEVOX CPU版
-├── docker-compose.gpu.yml                    # VOICEVOX GPU版
-├── docker-compose.aivis-speech.yml           # AivisSpeech Docker版
-├── docker-compose.aivis-speech-api-only.yml  # AivisSpeech（ローカル実行）用APIブリッジ
-├── Dockerfile                                # APIサーバーのビルド設定
-├── pyproject.toml                            # Pythonパッケージ設定
-├── voice_mappings/                           # 各エンジン用の話者IDマッピング
+├── docker-compose.yaml                        # VOICEVOX CPU版
+├── docker-compose.gpu.yaml                    # VOICEVOX GPU版
+├── docker-compose.aivis-speech.yaml           # AivisSpeech Docker版
+├── docker-compose.aivis-speech-api-only.yaml  # AivisSpeech（ローカル実行）用APIブリッジ
+├── Dockerfile                                 # APIサーバーのビルド設定
+├── pyproject.toml                             # Pythonパッケージ設定
+├── voice_mappings/                            # 各エンジン用の話者IDマッピング
 │   ├── voicevox.json
 │   └── aivis-speech.json
 ├── src/

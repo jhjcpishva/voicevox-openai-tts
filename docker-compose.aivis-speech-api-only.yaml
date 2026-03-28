@@ -1,4 +1,3 @@
-version: '3'
 services:
   openai_tts_api:
     build:
@@ -12,15 +11,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./voice_mappings/aivis-speech.json:/app/voice_mappings.json
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 2G
-        reservations:
-          memory: 512M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
