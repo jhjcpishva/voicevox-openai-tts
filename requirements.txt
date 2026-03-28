@@ -66,15 +66,20 @@ pre-commit==4.3.0
 pydantic==2.12.5
     # via
     #   fastapi
+    #   pydantic-settings
     #   voicevox-openai-tts
 pydantic-core==2.41.5
     # via pydantic
+pydantic-settings==2.13.1
+    # via voicevox-openai-tts
 pygments==2.19.2
     # via pytest
 pylint==3.3.8
 pytest==8.4.1
     # via pytest-asyncio
 pytest-asyncio==1.3.0
+python-dotenv==1.2.2
+    # via pydantic-settings
 pyyaml==6.0.2
     # via pre-commit
 ruff==0.12.10
@@ -94,6 +99,7 @@ typing-inspection==0.4.2
     # via
     #   fastapi
     #   pydantic
+    #   pydantic-settings
 uvicorn==0.42.0
     # via voicevox-openai-tts
 virtualenv==20.34.0
