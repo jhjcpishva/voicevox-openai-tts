@@ -1,8 +1,7 @@
-import os
-
 import httpx
 
 from ..api.voice_mappings import load_voice_mappings
+from ..settings import get_settings
 
 
 class SpeechServiceError(Exception):
@@ -28,9 +27,7 @@ class SpeechService:
     """音声合成関連のビジネスロジックを担当するサービス"""
 
     def __init__(self, voicevox_engine_url: str | None = None):
-        self.voicevox_url = voicevox_engine_url or os.getenv(
-            "VOICEVOX_ENGINE_URL", "http://voicevox_engine:50021"
-        )
+        self.voicevox_url = voicevox_engine_url or get_settings().voicevox_engine_url
 
     def _get_speaker_id(self, voice: str) -> int:
         """

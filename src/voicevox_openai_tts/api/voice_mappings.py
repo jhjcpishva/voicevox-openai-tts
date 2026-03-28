@@ -1,12 +1,11 @@
 from functools import lru_cache
 import json
-import os
 
-DEFAULT_MAPPING_PATH = "/app/voice_mappings.json"
+from ..settings import get_settings
 
 
 def get_voice_mappings_path() -> str:
-    return os.getenv("VOICE_MAPPINGS_PATH", DEFAULT_MAPPING_PATH)
+    return get_settings().voice_mappings_path
 
 
 @lru_cache

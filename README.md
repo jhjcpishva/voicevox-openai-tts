@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.13%2B-blue)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/Docker-Supported-blue)](https://www.docker.com/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.68%2B-009688)](https://fastapi.tiangolo.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.135%2B-009688)](https://fastapi.tiangolo.com/)
 
 VOICEVOX/AivisSpeechエンジンをOpenAIの音声合成APIフォーマットで利用するためのAPIサーバーです。
 
@@ -106,13 +106,17 @@ export VOICEVOX_ENGINE_URL=http://localhost:50021
 
 # AivisSpeech の場合
 export VOICEVOX_ENGINE_URL=http://localhost:10101
+
+# 必要に応じて API サーバーの待受を変更
+# export APP_HOST=0.0.0.0
+# export APP_PORT=8000
 ```
 
 #### Step 4: API サーバーを起動
 
 ```bash
 # 開発サーバーを起動（ホットリロード付き）
-uv run uvicorn voicevox_openai_tts.main:app --host 0.0.0.0 --port 8000 --reload
+uv run python -m voicevox_openai_tts.main
 ```
 
 API が `http://localhost:8000` で利用可能になります。
@@ -137,8 +141,10 @@ API が `http://localhost:8000` で利用可能になります。
 
 | 変数名 | デフォルト | 説明 |
 |--------|-----------|------|
-| `VOICEVOX_ENGINE_URL` | `http://localhost:50021` | VOICEVOX/AivisSpeechエンジンのURL |
-| `VOICE_MAPPINGS_PATH` | - | 音声マッピングJSONファイルのパス |
+| `APP_HOST` | `0.0.0.0` | API サーバーの待受ホスト |
+| `APP_PORT` | `8000` | API サーバーの待受ポート |
+| `VOICEVOX_ENGINE_URL` | `http://voicevox_engine:50021` | VOICEVOX/AivisSpeechエンジンのURL |
+| `VOICE_MAPPINGS_PATH` | `/app/voice_mappings.json` | 音声マッピングJSONファイルのパス |
 
 ## 📡 API仕様
 
