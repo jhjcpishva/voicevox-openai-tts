@@ -15,7 +15,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="VOICEVOX OpenAI TTS API",
         description="VOICEVOXエンジンをOpenAIの音声合成APIフォーマットで利用するためのAPI",
-        version="1.0.0",
+        version="0.3.1",
     )
 
     if settings.allow_origins:
