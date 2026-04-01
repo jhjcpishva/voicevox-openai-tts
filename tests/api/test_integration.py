@@ -6,6 +6,14 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from voicevox_openai_tts.api.create_app import create_app
+from voicevox_openai_tts.settings import get_settings
+
+
+@pytest.fixture(autouse=True)
+def clear_settings_cache():
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
 
 
 @pytest.fixture
@@ -27,6 +35,79 @@ class TestCoreEndpoints:
 
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
+
+
+@pytest.mark.asyncio
+class TestCorsConfiguration:
+    """CORS設定の統合テスト"""
+
+    async def test_cors_headers_are_not_added_when_allow_origins_is_unset(
+        self, monkeypatch
+    ):
+        """ALLOW_ORIGINS 未指定時は CORS ヘッダーを返さないこと"""
+        monkeypatch.delenv("ALLOW_ORIGINS", raising=False)
+        app = create_app()
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            response = await client.get(
+                "/health", headers={"Origin": "https://example.com"}
+            )
+
+        assert response.status_code == 200
+        assert "access-control-allow-origin" not in response.headers
+
+    async def test_cors_headers_are_added_for_single_allowed_origin(self, monkeypatch):
+        """単一オリジン指定時は一致した Origin を許可すること"""
+        monkeypatch.setenv("ALLOW_ORIGINS", "https://example.com")
+        app = create_app()
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            response = await client.get(
+                "/health", headers={"Origin": "https://example.com"}
+            )
+
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == "https://example.com"
+
+    async def test_cors_headers_are_added_for_matching_origin_in_list(
+        self, monkeypatch
+    ):
+        """複数オリジン指定時は一致した Origin のみ許可すること"""
+        monkeypatch.setenv(
+            "ALLOW_ORIGINS", "https://example.com, http://localhost:3000"
+        )
+        app = create_app()
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            response = await client.get(
+                "/health", headers={"Origin": "http://localhost:3000"}
+            )
+
+        assert response.status_code == 200
+        assert (
+            response.headers["access-control-allow-origin"] == "http://localhost:3000"
+        )
+
+    async def test_cors_headers_support_wildcard_origin(self, monkeypatch):
+        """ワイルドカード指定時は任意の Origin を許可すること"""
+        monkeypatch.setenv("ALLOW_ORIGINS", "*")
+        app = create_app()
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            response = await client.get(
+                "/health", headers={"Origin": "https://example.com"}
+            )
+
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == "*"
 
 
 @pytest.mark.asyncio
