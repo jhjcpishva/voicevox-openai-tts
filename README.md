@@ -107,6 +107,9 @@ export VOICEVOX_ENGINE_URL=http://localhost:50021
 # AivisSpeech の場合
 export VOICEVOX_ENGINE_URL=http://localhost:10101
 
+# CORS を有効にする場合（カンマ区切り、`*` も指定可能）
+# export ALLOW_ORIGINS=http://localhost:3000,https://example.com
+
 # 必要に応じて API サーバーの待受を変更
 # export APP_HOST=0.0.0.0
 # export APP_PORT=8000
@@ -145,6 +148,7 @@ API が `http://localhost:8000` で利用可能になります。
 | `APP_PORT` | `8000` | API サーバーの待受ポート |
 | `VOICEVOX_ENGINE_URL` | `http://voicevox_engine:50021` | VOICEVOX/AivisSpeechエンジンのURL |
 | `VOICE_MAPPINGS_PATH` | `/app/voice_mappings.json` | 音声マッピングJSONファイルのパス |
+| `ALLOW_ORIGINS` | 未指定 | CORS を有効にする許可オリジン。カンマ区切りで複数指定可能。未指定時は CORS ヘッダーを追加しない |
 
 ## 📡 API仕様
 
