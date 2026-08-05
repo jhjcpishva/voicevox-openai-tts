@@ -1,5 +1,6 @@
 from voicevox_openai_tts.settings import DEFAULT_APP_HOST
 from voicevox_openai_tts.settings import DEFAULT_APP_PORT
+from voicevox_openai_tts.settings import DEFAULT_VOICEVOX_ENGINE_TIMEOUT_SECONDS
 from voicevox_openai_tts.settings import DEFAULT_VOICEVOX_ENGINE_URL
 from voicevox_openai_tts.settings import DEFAULT_VOICE_MAPPINGS_PATH
 from voicevox_openai_tts.settings import Settings
@@ -16,6 +17,10 @@ class TestSettings:
         assert settings.app_host == DEFAULT_APP_HOST
         assert settings.app_port == DEFAULT_APP_PORT
         assert settings.voicevox_engine_url == DEFAULT_VOICEVOX_ENGINE_URL
+        assert (
+            settings.voicevox_engine_timeout_seconds
+            == DEFAULT_VOICEVOX_ENGINE_TIMEOUT_SECONDS
+        )
         assert settings.voice_mappings_path == DEFAULT_VOICE_MAPPINGS_PATH
         assert settings.allow_origins is None
 
@@ -23,6 +28,7 @@ class TestSettings:
         monkeypatch.setenv("APP_HOST", "127.0.0.1")
         monkeypatch.setenv("APP_PORT", "9000")
         monkeypatch.setenv("VOICEVOX_ENGINE_URL", "http://localhost:50021")
+        monkeypatch.setenv("VOICEVOX_ENGINE_TIMEOUT_SECONDS", "120.5")
         monkeypatch.setenv("VOICE_MAPPINGS_PATH", "/tmp/voice_mappings.json")
         monkeypatch.setenv(
             "ALLOW_ORIGINS", "http://localhost:3000, https://example.com"
@@ -33,6 +39,7 @@ class TestSettings:
         assert settings.app_host == "127.0.0.1"
         assert settings.app_port == 9000
         assert settings.voicevox_engine_url == "http://localhost:50021"
+        assert settings.voicevox_engine_timeout_seconds == 120.5
         assert settings.voice_mappings_path == "/tmp/voice_mappings.json"
         assert settings.allow_origins == [
             "http://localhost:3000",

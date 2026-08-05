@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+import httpx
 
 from ..schemas.voices import AudioVoicesResponse
 from ...services.voice import VoiceService
@@ -22,7 +23,11 @@ async def list_audio_voices() -> AudioVoicesResponse:
     try:
         voices = await voice_service.get_available_voices()
         return AudioVoicesResponse(voices=voices)
+    except httpx.TimeoutException as e:
+        raise HTTPException(
+            status_code=504, detail="VOICEVOXエンジンとの通信がタイムアウトしました"
+        ) from e
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"VOICEVOXエンジンとの通信に失敗しました: {str(e)}"
-        )
+        ) from e
