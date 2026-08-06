@@ -125,6 +125,7 @@ class TestVoicesEndpoints:
         assert response.status_code in [
             200,
             500,
+            504,
             502,
             503,
         ]  # 正常またはVOICEVOX接続エラー

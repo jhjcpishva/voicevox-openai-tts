@@ -147,6 +147,7 @@ API が `http://localhost:8000` で利用可能になります。
 | `APP_HOST` | `0.0.0.0` | API サーバーの待受ホスト |
 | `APP_PORT` | `8000` | API サーバーの待受ポート |
 | `VOICEVOX_ENGINE_URL` | `http://voicevox_engine:50021` | VOICEVOX/AivisSpeechエンジンのURL |
+| `VOICEVOX_ENGINE_TIMEOUT_SECONDS` | `60.0` | VOICEVOX/AivisSpeechエンジンへのリクエストタイムアウト秒数 |
 | `VOICE_MAPPINGS_PATH` | `/app/voice_mappings.json` | 音声マッピングJSONファイルのパス |
 | `ALLOW_ORIGINS` | 未指定 | CORS を有効にする許可オリジン。カンマ区切りで複数指定可能。未指定時は CORS ヘッダーを追加しない |
 

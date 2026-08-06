@@ -1,10 +1,13 @@
 from dataclasses import dataclass
+import logging
 
 import httpx
 
 from ..api.voice_mappings import load_voice_mappings
 from ..api.schemas.voices import AudioVoice
 from ..settings import get_settings
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -18,8 +21,18 @@ class SpeakerInfo:
 class VoiceService:
     """音声情報関連のビジネスロジックを担当するサービス"""
 
-    def __init__(self, voicevox_engine_url: str | None = None):
-        self.voicevox_url = voicevox_engine_url or get_settings().voicevox_engine_url
+    def __init__(
+        self,
+        voicevox_engine_url: str | None = None,
+        timeout_seconds: float | None = None,
+    ):
+        settings = get_settings()
+        self.voicevox_url = voicevox_engine_url or settings.voicevox_engine_url
+        self.timeout_seconds = (
+            timeout_seconds
+            if timeout_seconds is not None
+            else settings.voicevox_engine_timeout_seconds
+        )
 
     def _build_voice_name(self, speaker_name: str, style_name: str) -> str:
         return f"{speaker_name} / {style_name}"
@@ -76,9 +89,35 @@ class VoiceService:
         """
         speakers_url = f"{self.voicevox_url}/speakers"
 
-        async with httpx.AsyncClient() as client:
-            response = await client.get(speakers_url)
-            response.raise_for_status()
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout_seconds) as client:
+                response = await client.get(speakers_url)
+                response.raise_for_status()
+        except httpx.TimeoutException:
+            logger.warning(
+                "VOICEVOX engine speakers request timed out: "
+                "engine_url=%s timeout_seconds=%s",
+                self.voicevox_url,
+                self.timeout_seconds,
+                exc_info=True,
+            )
+            raise
+        except httpx.HTTPStatusError as e:
+            logger.warning(
+                "VOICEVOX engine speakers request returned an error response: "
+                "engine_url=%s status_code=%s response_excerpt=%r",
+                self.voicevox_url,
+                e.response.status_code,
+                e.response.text[:500],
+                exc_info=True,
+            )
+            raise
+        except httpx.HTTPError:
+            logger.exception(
+                "VOICEVOX engine speakers request failed: engine_url=%s",
+                self.voicevox_url,
+            )
+            raise
 
         speakers_data = response.json()
         style_voices = self._flatten_speakers_to_voices(speakers_data)

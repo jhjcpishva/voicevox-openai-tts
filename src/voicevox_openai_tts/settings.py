@@ -8,6 +8,7 @@ from pydantic_settings import SettingsConfigDict
 DEFAULT_APP_HOST = "0.0.0.0"
 DEFAULT_APP_PORT = 8000
 DEFAULT_VOICEVOX_ENGINE_URL = "http://voicevox_engine:50021"
+DEFAULT_VOICEVOX_ENGINE_TIMEOUT_SECONDS = 60.0
 DEFAULT_VOICE_MAPPINGS_PATH = "/app/voice_mappings.json"
 
 
@@ -17,8 +18,17 @@ class Settings(BaseSettings):
     app_host: str = DEFAULT_APP_HOST
     app_port: int = DEFAULT_APP_PORT
     voicevox_engine_url: str = DEFAULT_VOICEVOX_ENGINE_URL
+    voicevox_engine_timeout_seconds: float = DEFAULT_VOICEVOX_ENGINE_TIMEOUT_SECONDS
     voice_mappings_path: str = DEFAULT_VOICE_MAPPINGS_PATH
     allow_origins: list[str] | None = None
+
+    @field_validator("voicevox_engine_timeout_seconds")
+    @classmethod
+    def validate_voicevox_engine_timeout_seconds(cls, value: float) -> float:
+        if value <= 0:
+            raise ValueError("VOICEVOX_ENGINE_TIMEOUT_SECONDS must be greater than 0")
+
+        return value
 
     @field_validator("allow_origins", mode="before")
     @classmethod
