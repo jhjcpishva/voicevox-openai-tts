@@ -50,6 +50,8 @@ iniconfig==2.1.0
     # via pytest
 isort==6.0.1
     # via pylint
+lameenc==1.8.4
+    # via voicevox-openai-tts
 mccabe==0.7.0
     # via pylint
 nodeenv==1.9.1

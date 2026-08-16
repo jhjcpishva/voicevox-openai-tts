@@ -1,9 +1,15 @@
+import asyncio
 import logging
+from collections.abc import Mapping
 
 import httpx
 
 from ..api.voice_mappings import load_voice_mappings
 from ..settings import get_settings
+from .audio_encoder import AudioEncoder
+from .audio_encoder import AudioEncodingError
+from .audio_encoder import LameMp3Encoder
+from .audio_encoder import WavPassthroughEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +40,7 @@ class SpeechService:
         self,
         voicevox_engine_url: str | None = None,
         timeout_seconds: float | None = None,
+        audio_encoders: Mapping[str, AudioEncoder] | None = None,
     ):
         settings = get_settings()
         self.voicevox_url = voicevox_engine_url or settings.voicevox_engine_url
@@ -41,6 +48,14 @@ class SpeechService:
             timeout_seconds
             if timeout_seconds is not None
             else settings.voicevox_engine_timeout_seconds
+        )
+        self.audio_encoders = dict(
+            audio_encoders
+            if audio_encoders is not None
+            else {
+                "mp3": LameMp3Encoder(),
+                "wav": WavPassthroughEncoder(),
+            }
         )
 
     def _get_speaker_id(self, voice: str) -> int:
@@ -70,7 +85,11 @@ class SpeechService:
             raise InvalidVoiceError(voice, available)
 
     async def synthesize_speech(
-        self, text: str, voice: str, speed: float = 1.0
+        self,
+        text: str,
+        voice: str,
+        speed: float = 1.0,
+        response_format: str = "mp3",
     ) -> tuple[bytes, str]:
         """
         テキストを音声に変換
@@ -79,6 +98,7 @@ class SpeechService:
             text: 読み上げるテキスト
             voice: 音声名または音声ID
             speed: 読み上げ速度（デフォルト: 1.0）
+            response_format: 出力形式（mp3またはwav、デフォルト: mp3）
 
         Returns:
             tuple[bytes, str]: 音声データとメディアタイプ
@@ -87,6 +107,13 @@ class SpeechService:
             SpeechServiceError: 音声合成に失敗した場合
         """
         speaker_id = self._get_speaker_id(voice)
+        audio_encoder = self.audio_encoders.get(response_format)
+        if audio_encoder is None:
+            raise SpeechServiceError(
+                f"Unsupported response format: {response_format}",
+                status_code=400,
+            )
+
         audio_query_url = f"{self.voicevox_url}/audio_query"
         synthesis_url = f"{self.voicevox_url}/synthesis"
 
@@ -108,7 +135,21 @@ class SpeechService:
                 )
                 synthesis_response.raise_for_status()
 
-            return synthesis_response.content, "audio/mpeg"
+            wav_data = synthesis_response.content
+            try:
+                encoded_audio = await asyncio.to_thread(audio_encoder.encode, wav_data)
+            except AudioEncodingError as e:
+                logger.exception(
+                    "Audio encoding failed: speaker_id=%s wav_size=%s",
+                    speaker_id,
+                    len(wav_data),
+                )
+                raise SpeechServiceError(
+                    "音声データのMP3変換に失敗しました",
+                    status_code=500,
+                ) from e
+
+            return encoded_audio, audio_encoder.media_type
 
         except httpx.TimeoutException as e:
             logger.warning(
