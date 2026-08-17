@@ -188,6 +188,7 @@ curl -X POST http://localhost:8000/v1/audio/speech \
 | `model` | string | Yes | モデル名（"voicevox-v1"固定） |
 | `input` | string | Yes | 読み上げるテキスト |
 | `voice` | string | Yes | 話者ID（VOICEVOX StyleID, `/v1/audio/voices` で取得可能）またはOpenAI互換名（alloy, ash等） |
+| `response_format` | string | No | 出力形式（`mp3` または `wav`、デフォルト: `mp3`） |
 | `speed` | float | No | 読み上げ速度（0.5〜2.0、デフォルト: 1.0） |
 
 **レスポンス:**

@@ -1,4 +1,5 @@
 import logging
+import threading
 
 import httpx
 import pytest
@@ -127,3 +128,72 @@ class TestSpeechService:
         assert "VOICEVOX engine request timed out" in caplog.text
         assert "engine_url=http://custom:50021" in caplog.text
         assert "timeout_seconds=120.0" in caplog.text
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("response_format", "media_type"),
+        [("mp3", "audio/mpeg"), ("wav", "audio/wav")],
+    )
+    async def test_synthesize_speech_selects_encoder_outside_event_loop(
+        self, monkeypatch, response_format, media_type
+    ):
+        """WAVのエンコードがイベントループ外で実行されること"""
+
+        class FakeResponse:
+            def __init__(self, *, json_data=None, content=b""):
+                self.json_data = json_data
+                self.content = content
+
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return self.json_data
+
+        class SuccessAsyncClient:
+            def __init__(self, timeout):
+                self.request_count = 0
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, exc_type, exc_value, traceback):
+                return False
+
+            async def post(self, url, params=None, json=None):
+                self.request_count += 1
+                if self.request_count == 1:
+                    return FakeResponse(json_data={"speedScale": 1.0})
+                return FakeResponse(content=b"wav data")
+
+        class FakeEncoder:
+            def __init__(self, selected_media_type):
+                self.media_type = selected_media_type
+                self.thread_id = None
+                self.wav_data = None
+
+            def encode(self, wav_data):
+                self.thread_id = threading.get_ident()
+                self.wav_data = wav_data
+                return b"encoded data"
+
+        monkeypatch.setattr(
+            "voicevox_openai_tts.services.speech.httpx.AsyncClient",
+            SuccessAsyncClient,
+        )
+        encoder = FakeEncoder(media_type)
+        event_loop_thread_id = threading.get_ident()
+        service = SpeechService(
+            "http://custom:50021",
+            timeout_seconds=120.0,
+            audio_encoders={response_format: encoder},
+        )
+
+        audio_data, returned_media_type = await service.synthesize_speech(
+            "テスト", "1", response_format=response_format
+        )
+
+        assert audio_data == b"encoded data"
+        assert returned_media_type == media_type
+        assert encoder.wav_data == b"wav data"
+        assert encoder.thread_id != event_loop_thread_id

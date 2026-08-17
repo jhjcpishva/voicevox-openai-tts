@@ -1,6 +1,6 @@
 [project]
 name = "voicevox-openai-tts"
-version = "0.3.2"
+version = "0.3.3"
 description = "OpenAI-compatible TTS bridge for VOICEVOX and AivisSpeech"
 readme = "README.md"
 license = "MIT"
@@ -8,6 +8,7 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.135.2",
     "httpx>=0.28.1",
+    "lameenc>=1.8.4",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.13.1",
     "uvicorn>=0.42.0",

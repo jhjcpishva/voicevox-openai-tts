@@ -154,3 +154,20 @@ class TestSpeechEndpoints:
 
         # 無効な音声指定で400エラーが返されることを確認
         assert response.status_code == 400
+
+    async def test_speech_endpoint_rejects_unsupported_response_format(self, app):
+        """未対応のレスポンス形式を拒否すること"""
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            response = await client.post(
+                "/v1/audio/speech",
+                json={
+                    "model": "voicevox-v1",
+                    "input": "テスト",
+                    "voice": "alloy",
+                    "response_format": "opus",
+                },
+            )
+
+        assert response.status_code == 422
