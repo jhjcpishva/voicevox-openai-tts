@@ -26,6 +26,26 @@ def app():
 class TestCoreEndpoints:
     """コアエンドポイントの統合テスト"""
 
+    async def test_models_endpoint(self, app):
+        """APIモデルの一覧をOpenAI互換形式で返すこと"""
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            response = await client.get("/v1/models")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "object": "list",
+            "data": [
+                {
+                    "id": "voicevox-v1",
+                    "object": "model",
+                    "created": 0,
+                    "owned_by": "voicevox-openai-tts",
+                }
+            ],
+        }
+
     async def test_health_endpoint(self, app):
         """ヘルスチェックエンドポイントが動作すること"""
         async with AsyncClient(

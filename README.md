@@ -158,10 +158,32 @@ API が `http://localhost:8000` で利用可能になります。
 | メソッド | パス | 説明 |
 |---------|------|------|
 | POST | `/v1/audio/speech` | テキストを音声に変換 |
+| GET | `/v1/models` | APIモデル一覧を取得 |
 | GET | `/v1/audio/voices` | 利用可能な音声一覧を取得 |
 | GET | `/health` | ヘルスチェック |
 
 `http://localhost:8000/docs` で Swagger UI も利用可能です
+
+### GET /v1/models
+
+このAPIのモデル識別子 `voicevox-v1` をOpenAI互換形式で返します。
+VOICEVOX/AivisSpeechエンジンへの問い合わせは行いません。
+話者・スタイルの一覧は `/v1/audio/voices` で取得してください。
+音声合成時の `model` の値の検証は行いません。
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "voicevox-v1",
+      "object": "model",
+      "created": 0,
+      "owned_by": "voicevox-openai-tts"
+    }
+  ]
+}
+```
 
 ### POST /v1/audio/speech
 
@@ -185,7 +207,7 @@ curl -X POST http://localhost:8000/v1/audio/speech \
 
 | パラメータ | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
-| `model` | string | Yes | モデル名（"voicevox-v1"固定） |
+| `model` | string | Yes | APIモデル識別子（`voicevox-v1` 推奨。現在は値の検証なし） |
 | `input` | string | Yes | 読み上げるテキスト |
 | `voice` | string | Yes | 話者ID（VOICEVOX StyleID, `/v1/audio/voices` で取得可能）またはOpenAI互換名（alloy, ash等） |
 | `response_format` | string | No | 出力形式（`mp3` または `wav`、デフォルト: `mp3`） |
