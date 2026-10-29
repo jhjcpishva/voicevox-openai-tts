@@ -90,6 +90,7 @@ class SpeechService:
         voice: str,
         speed: float = 1.0,
         response_format: str = "mp3",
+        voicevox_options: Mapping[str, float | bool] | None = None,
     ) -> tuple[bytes, str]:
         """
         テキストを音声に変換
@@ -99,6 +100,7 @@ class SpeechService:
             voice: 音声名または音声ID
             speed: 読み上げ速度（デフォルト: 1.0）
             response_format: 出力形式（mp3またはwav、デフォルト: mp3）
+            voicevox_options: エンジン形式の音声合成オプション
 
         Returns:
             tuple[bytes, str]: 音声データとメディアタイプ
@@ -126,12 +128,20 @@ class SpeechService:
                 query_response.raise_for_status()
                 query_data = query_response.json()
 
+                options = dict(voicevox_options or {})
+                synthesis_params = {"speaker": speaker_id}
+                if "enable_interrogative_upspeak" in options:
+                    synthesis_params["enable_interrogative_upspeak"] = options.pop(
+                        "enable_interrogative_upspeak"
+                    )
+                query_data.update(options)
+
                 # 読み上げ速度を設定
                 query_data["speedScale"] = speed
 
                 # 音声合成を実行
                 synthesis_response = await client.post(
-                    synthesis_url, params={"speaker": speaker_id}, json=query_data
+                    synthesis_url, params=synthesis_params, json=query_data
                 )
                 synthesis_response.raise_for_status()
 

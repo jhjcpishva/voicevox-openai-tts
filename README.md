@@ -158,10 +158,32 @@ API が `http://localhost:8000` で利用可能になります。
 | メソッド | パス | 説明 |
 |---------|------|------|
 | POST | `/v1/audio/speech` | テキストを音声に変換 |
+| GET | `/v1/models` | APIモデル一覧を取得 |
 | GET | `/v1/audio/voices` | 利用可能な音声一覧を取得 |
 | GET | `/health` | ヘルスチェック |
 
 `http://localhost:8000/docs` で Swagger UI も利用可能です
+
+### GET /v1/models
+
+このAPIのモデル識別子 `voicevox-v1` をOpenAI互換形式で返します。
+VOICEVOX/AivisSpeechエンジンへの問い合わせは行いません。
+話者・スタイルの一覧は `/v1/audio/voices` で取得してください。
+音声合成時の `model` の値の検証は行いません。
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "voicevox-v1",
+      "object": "model",
+      "created": 0,
+      "owned_by": "voicevox-openai-tts"
+    }
+  ]
+}
+```
 
 ### POST /v1/audio/speech
 
@@ -185,11 +207,49 @@ curl -X POST http://localhost:8000/v1/audio/speech \
 
 | パラメータ | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
-| `model` | string | Yes | モデル名（"voicevox-v1"固定） |
+| `model` | string | Yes | APIモデル識別子（`voicevox-v1` 推奨。現在は値の検証なし） |
 | `input` | string | Yes | 読み上げるテキスト |
 | `voice` | string | Yes | 話者ID（VOICEVOX StyleID, `/v1/audio/voices` で取得可能）またはOpenAI互換名（alloy, ash等） |
 | `response_format` | string | No | 出力形式（`mp3` または `wav`、デフォルト: `mp3`） |
 | `speed` | float | No | 読み上げ速度（0.5〜2.0、デフォルト: 1.0） |
+| `voicevox` | object | No | VOICEVOX/AivisSpeech向けの音声合成オプション |
+
+`voicevox` は以下のキーを持つオブジェクトです。未指定または `null` の項目は、
+エンジンが `/audio_query` で返す値を維持します。話速は既存の `speed` を使います。
+
+| キー | このAPIで受け付ける範囲 | VOICEVOX | AivisSpeech |
+|------|------------------------|----------|-------------|
+| `intonation_scale` | 0.0〜2.0 | 抑揚 | スタイルの強さ |
+| `tempo_dynamics_scale` | 0.0〜2.0 | 未対応 | テンポの緩急 |
+| `pitch_scale` | -0.15〜0.15 | 音高 | 音高 |
+| `volume_scale` | 0.0〜2.0 | 音量 | 音量 |
+| `pre_phoneme_length` | 0.0以上（秒） | 開始無音 | 開始無音 |
+| `post_phoneme_length` | 0.0以上（秒） | 終了無音 | 終了無音 |
+| `pause_length` | 0.0以上（秒） | 句読点の無音時間 | 無視される |
+| `pause_length_scale` | 0.0以上 | 句読点の無音時間の倍率 | 無視される |
+| `enable_interrogative_upspeak` | boolean | 疑問文の語尾の自動調整 | 無視される |
+
+AivisSpeechのノーマルスタイルでは `intonation_scale` は無視されます。
+AivisSpeechでは `pitch_scale` を変更すると音質が低下する可能性があります。
+不明なキー・範囲外・非有限値は `422` を返します。
+このAPIでは接続先がVOICEVOXかAivisSpeechかを判定せず、指定値をエンジンへ渡します。
+専用項目も接続先による制限は行わず、実際の適用可否はエンジンに委ねます。
+`enable_interrogative_upspeak` は `/synthesis` のクエリ引数、残りはJSON本文に設定します。
+各項目の対応エンジンと意味はOpenAPI（`/docs`）でも確認できます。
+
+```json
+{
+  "model": "voicevox-v1",
+  "input": "こんにちは。",
+  "voice": "alloy",
+  "speed": 1.1,
+  "voicevox": {
+    "volume_scale": 0.9,
+    "pre_phoneme_length": 0.0,
+    "post_phoneme_length": 0.2
+  }
+}
+```
 
 **レスポンス:**
 
@@ -243,7 +303,7 @@ response = client.audio.speech.create(
     model="voicevox-v1",
     voice="alloy",
     input="こんにちは、音声合成のテストです。",
-    speed=1.0
+    speed=1.0,
 )
 
 with open("output.mp3", "wb") as f:
