@@ -1,4 +1,5 @@
 import logging
+import json
 import threading
 
 import httpx
@@ -13,6 +14,88 @@ from voicevox_openai_tts.services.speech import (
 
 class TestSpeechService:
     """SpeechServiceのユニットテスト"""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "options",
+        [
+            None,
+            {"volumeScale": 0.0, "pitchScale": -0.1},
+            {"tempoDynamicsScale": 1.2},
+            {"pauseLength": 0.0, "pauseLengthScale": 0.5},
+        ],
+    )
+    async def test_synthesis_preserves_query_and_applies_options(
+        self, monkeypatch, options
+    ):
+        query = {
+            "speedScale": 1.0,
+            "volumeScale": 1.0,
+            "pitchScale": 0.0,
+            "prePhonemeLength": 0.1,
+            "kana": "こんにちは。",
+            "accent_phrases": [],
+        }
+        requests = []
+
+        def handle(request):
+            requests.append(request)
+            if request.url.path == "/audio_query":
+                return httpx.Response(200, json=query)
+            assert request.url.path == "/synthesis"
+            assert "enable_interrogative_upspeak" not in request.url.params
+            assert json.loads(request.content) == {
+                **query,
+                **(options or {}),
+                "speedScale": 1.2,
+            }
+            return httpx.Response(200, content=b"wav")
+
+        client_type = httpx.AsyncClient
+        monkeypatch.setattr(
+            "voicevox_openai_tts.services.speech.httpx.AsyncClient",
+            lambda **kwargs: client_type(
+                transport=httpx.MockTransport(handle), **kwargs
+            ),
+        )
+        service = SpeechService("http://engine")
+        result = await service.synthesize_speech(
+            "こんにちは。",
+            "1",
+            speed=1.2,
+            response_format="wav",
+            voicevox_options=options,
+        )
+        assert result == (b"wav", "audio/wav")
+        assert len(requests) == 2
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("enabled", [True, False])
+    async def test_upspeak_is_forwarded_as_query_parameter(self, monkeypatch, enabled):
+        def handle(request):
+            if request.url.path == "/audio_query":
+                return httpx.Response(200, json={"speedScale": 1.0})
+            assert request.url.path == "/synthesis"
+            assert dict(request.url.params) == {
+                "speaker": "1",
+                "enable_interrogative_upspeak": str(enabled).lower(),
+            }
+            assert json.loads(request.content) == {"speedScale": 1.0}
+            return httpx.Response(200, content=b"wav")
+
+        client_type = httpx.AsyncClient
+        monkeypatch.setattr(
+            "voicevox_openai_tts.services.speech.httpx.AsyncClient",
+            lambda **kwargs: client_type(
+                transport=httpx.MockTransport(handle), **kwargs
+            ),
+        )
+        options = {"enable_interrogative_upspeak": enabled}
+        result = await SpeechService("http://engine").synthesize_speech(
+            "テスト", "1", response_format="wav", voicevox_options=options
+        )
+        assert result == (b"wav", "audio/wav")
+        assert options == {"enable_interrogative_upspeak": enabled}
 
     def test_init_with_default_url(self):
         """デフォルトURLで初期化できること"""

@@ -28,6 +28,9 @@ async def create_speech(request: SpeechRequest):
             voice=request.voice,
             speed=request.speed,
             response_format=request.response_format,
+            voicevox_options=request.voicevox.model_dump(
+                by_alias=True, exclude_none=True
+            ),
         )
         return Response(content=audio_data, media_type=media_type)
     except InvalidVoiceError as e:
