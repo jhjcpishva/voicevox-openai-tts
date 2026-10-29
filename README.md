@@ -303,7 +303,7 @@ response = client.audio.speech.create(
     model="voicevox-v1",
     voice="alloy",
     input="こんにちは、音声合成のテストです。",
-    speed=1.0
+    speed=1.0,
 )
 
 with open("output.mp3", "wb") as f:
